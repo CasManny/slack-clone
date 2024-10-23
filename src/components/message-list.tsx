@@ -90,7 +90,7 @@ const MessageList = ({
                 setEditingId={setEditingId}
                 isCompact={isCompact!}
                 hideThreadButton={variant === 'thread'}
-                updatedAt={message.updateAt}
+                updatedAt={message.updatedAt}
                 createdAt={message._creationTime}
                 threadCount={message.threadCount}
                 threadTimeStamp={message.threadTimestamp}
