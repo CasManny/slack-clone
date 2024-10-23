@@ -81,6 +81,14 @@ const Editor = ({
               key: "Enter",
               handler: () => {
                 // TODO: SUBMIT FORM
+                const text = quill.getText();
+                const addedImage = imageElementRef.current?.files![0] || null;
+                const isEmpty =
+                  !addedImage &&
+                  text.replace(/<(.|\n)*?>/g, "").trim().length === 0;
+                if (isEmpty) return;
+                const body = JSON.stringify(quill.getContents());
+                submitRef.current?.({ body, image: addedImage });
                 return;
               },
             },
@@ -133,7 +141,7 @@ const Editor = ({
       toolbarElement.classList.toggle("hidden");
     }
   };
-  const isEmpty = text.replace(/<(.|\n)*?>/g, "").trim().length === 0;
+  const isEmpty = !image && text.replace(/<(.|\n)*?>/g, "").trim().length === 0;
 
   const onEmojiSelect = (emoji: any) => {
     const quill = quillRef.current;
@@ -149,24 +157,33 @@ const Editor = ({
         onChange={(event) => setImage(event.target.files![0])}
         className="hidden"
       />
-      <div className="flex flex-col border border-slate-200 rounded-md overflow-hidden focus-within:border-slate-300 focus-within:shadow-sm transition bg-white">
+      <div
+        className={cn(
+          "flex flex-col border border-slate-200 rounded-md overflow-hidden focus-within:border-slate-300 focus-within:shadow-sm transition bg-white",
+          disabled && "opacity-50"
+        )}
+      >
         <div ref={containerRef} className="h-full ql-custom" />
         {!!image && (
           <div className="p-2">
             <div className="relative size-[62px] flex items-center justify-center group/image">
               <Hint label="remove image">
-              <button
-                className="hidden group-hover/image:flex rounded-full bg-black/70 hover:bg-black absolute -top-2.5 -right-2.5 text-white size-6 z-50 border-2 border-white items-center justify-center"
-                onClick={() => {
-                  setImage(null);
-                  imageElementRef.current!.value = "";
-                }}
-              >
-                <XIcon className="size-3.5" />
-              </button>
-
+                <button
+                  className="hidden group-hover/image:flex rounded-full bg-black/70 hover:bg-black absolute -top-2.5 -right-2.5 text-white size-6 z-50 border-2 border-white items-center justify-center"
+                  onClick={() => {
+                    setImage(null);
+                    imageElementRef.current!.value = "";
+                  }}
+                >
+                  <XIcon className="size-3.5" />
+                </button>
               </Hint>
-              <Image src={URL.createObjectURL(image)} alt="uploaded" fill className="rounded-xl overflow-hidden object-cover border" />
+              <Image
+                src={URL.createObjectURL(image)}
+                alt="uploaded"
+                fill
+                className="rounded-xl overflow-hidden object-cover border"
+              />
             </div>
           </div>
         )}
@@ -206,7 +223,7 @@ const Editor = ({
               <Button
                 variant={"outline"}
                 size={"sm"}
-                onClick={() => {}}
+                onClick={onCancel}
                 disabled={disabled}
               >
                 Cancel
@@ -224,7 +241,12 @@ const Editor = ({
           {variant === "Create" && (
             <Button
               disabled={disabled || isEmpty}
-              onClick={() => {}}
+              onClick={() => {
+                onSubmit({
+                  body: JSON.stringify(quillRef.current?.getContents()),
+                  image,
+                });
+              }}
               size={"iconSm"}
               className={cn(
                 "ml-auto",
