@@ -191,6 +191,7 @@ const Thread = ({ messageId, onClose }: ThreadProps) => {
                   updatedAt={message.updatedAt}
                   createdAt={message._creationTime}
                   threadCount={message.threadCount}
+                  threadName={message.threadName}
                   threadTimeStamp={message.threadTimestamp}
                 />
               );

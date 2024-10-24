@@ -95,24 +95,31 @@ const MessageList = ({
                 updatedAt={message.updatedAt}
                 createdAt={message._creationTime}
                 threadCount={message.threadCount}
+                threadName={message.threadName}
                 threadTimeStamp={message.threadTimestamp}
               />
             );
           })}
         </div>
       ))}
-          <div className="h-1" ref={(el) => {
-              if (el) {
-                  const observer = new IntersectionObserver(([entry]) => {
-                      if (entry.isIntersecting && canLoadMore) {
-                          loadMore()
-                      }
-                  }, { threshold: 1.0 })
-                  observer.observe(el)
-                  return () => observer.disconnect()
-              }
-      }} />
-       
+      <div
+        className="h-1"
+        ref={(el) => {
+          if (el) {
+            const observer = new IntersectionObserver(
+              ([entry]) => {
+                if (entry.isIntersecting && canLoadMore) {
+                  loadMore();
+                }
+              },
+              { threshold: 1.0 }
+            );
+            observer.observe(el);
+            return () => observer.disconnect();
+          }
+        }}
+      />
+
       {isLoadingMore && (
         <div className="text-center my-2 relative">
           <hr className="absolute top-1/2 left-0 right-0  border-t border-gray-300 " />
