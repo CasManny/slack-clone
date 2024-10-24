@@ -10,6 +10,9 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useRemoveMessage } from "@/features/messages/api/use-remove-message";
 import { useConfirm } from "@/hooks/use-confirm";
+import { useToggleReaction } from "@/features/reactions/api/use-toggle-reaction";
+import Reactions from "./reactions";
+import { usePanel } from "@/hooks/use-panel";
 
 const Renderer = dynamic(() => import("@/components/renderer"), { ssr: false });
 const Editor = dynamic(() => import("@/components/editor"), { ssr: false });
@@ -60,6 +63,7 @@ const Message = ({
   threadImage,
   threadTimeStamp,
 }: MessageProps) => {
+    const {onOpenMessage, onClose, parentMessageId} = usePanel()
   const [ConfirmDialog, confirm] = useConfirm(
     "Delete message",
     "Are you sure you want to delete this message."
@@ -69,6 +73,8 @@ const Message = ({
     useUpdateMessage();
   const { mutate: removeMessage, isPending: isRemovingMessage } =
     useRemoveMessage();
+  const { mutate: toggleReaction, isPending: isTogglingReaction } =
+    useToggleReaction();
   const isPending = isUpdatingMessage;
   const handleUpdate = ({ body }: { body: string }) => {
     updateMessage(
@@ -92,7 +98,10 @@ const Message = ({
       { id },
       {
         onSuccess: () => {
-          toast.success("message deleted...");
+              toast.success("message deleted...");
+              if (parentMessageId === id) {
+                  onClose()
+              }
         },
         onError: () => {
           toast.error("Failed to delete message");
@@ -101,6 +110,16 @@ const Message = ({
     );
   };
 
+  const handleReaction = (value: string) => {
+    toggleReaction(
+      { messageId: id, value },
+      {
+        onError: () => {
+          toast.error("Failed to toggle reaction");
+        },
+      }
+    );
+  };
   if (isCompact) {
     return (
       <>
@@ -108,8 +127,9 @@ const Message = ({
         <div
           className={cn(
             "flex flex-col gap-5 p-1.5 px-5 hover:bg-gray-100/60 group relative",
-              isEditing && "bg-[#f2c74433] hover:bg-[#f2c74433]",
-            isRemovingMessage && "bg-rose-500/50 transform transition-all scale-y-0 origin-bottom duration-200"
+            isEditing && "bg-[#f2c74433] hover:bg-[#f2c74433]",
+            isRemovingMessage &&
+              "bg-rose-500/50 transform transition-all scale-y-0 origin-bottom duration-200"
           )}
         >
           <div className="flex items-start gap-2">
@@ -138,6 +158,7 @@ const Message = ({
                     (edited)
                   </span>
                 ) : null}
+                <Reactions data={reactions} onChange={handleReaction} />
               </div>
             )}
           </div>
@@ -146,8 +167,8 @@ const Message = ({
               isAuthor={isAuthor}
               isPending={isPending}
               handleEdit={() => setEditingId(id)}
-              handleThread={() => {}}
-              handleReaction={() => {}}
+              handleThread={() => onOpenMessage(id)}
+              handleReaction={handleReaction}
               handleDelete={handleRemove}
               hideThreadButton={hideThreadButton}
             />
@@ -162,8 +183,9 @@ const Message = ({
       <div
         className={cn(
           "flex flex-col gap-5 p-1.5 px-5 hover:bg-gray-100/60 group relative",
-            isEditing && "bg-[#f2c74433] hover:bg-[#f2c74433]",
-            isRemovingMessage && "bg-rose-500/50 transform transition-all scale-y-0 origin-bottom duration-200"
+          isEditing && "bg-[#f2c74433] hover:bg-[#f2c74433]",
+          isRemovingMessage &&
+            "bg-rose-500/50 transform transition-all scale-y-0 origin-bottom duration-200"
         )}
       >
         <div className="flex items-start gap-2">
@@ -206,6 +228,7 @@ const Message = ({
               {updatedAt ? (
                 <span className="text-xs text-muted-foreground">(edited)</span>
               ) : null}
+              <Reactions data={reactions} onChange={handleReaction} />
             </div>
           )}
         </div>
@@ -214,8 +237,8 @@ const Message = ({
             isAuthor={isAuthor}
             isPending={isPending}
             handleEdit={() => setEditingId(id)}
-            handleThread={() => {}}
-            handleReaction={() => {}}
+            handleThread={() => onOpenMessage(id)}
+            handleReaction={handleReaction}
             handleDelete={handleRemove}
             hideThreadButton={hideThreadButton}
           />

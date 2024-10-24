@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Id } from "../../convex/_generated/dataModel";
 import { useWorkspaceId } from "@/hooks/use-workspace-id";
 import { useCurrentMember } from "@/features/members/api/use-current-member";
+import { Loader } from "lucide-react";
 
 const formatDateLabel = (dateStr: string) => {
   const date = new Date(dateStr);
@@ -39,9 +40,9 @@ const MessageList = ({
   channelName,
   variant = "channel",
 }: MessageListProps) => {
-    const [editingId, setEditingId] = useState<Id<'messages'> | null>(null)
-    const workspaceId = useWorkspaceId()
-    const {data: currentMember} = useCurrentMember({workspaceId})
+  const [editingId, setEditingId] = useState<Id<"messages"> | null>(null);
+  const workspaceId = useWorkspaceId();
+  const { data: currentMember } = useCurrentMember({ workspaceId });
 
   const groupedMessages = data?.reduce(
     (groups, message) => {
@@ -89,7 +90,7 @@ const MessageList = ({
                 isEditing={editingId === message._id}
                 setEditingId={setEditingId}
                 isCompact={isCompact!}
-                hideThreadButton={variant === 'thread'}
+                hideThreadButton={variant === "thread"}
                 updatedAt={message.updatedAt}
                 createdAt={message._creationTime}
                 threadCount={message.threadCount}
@@ -99,8 +100,28 @@ const MessageList = ({
           })}
         </div>
       ))}
+          <div className="h-1" ref={(el) => {
+              if (el) {
+                  const observer = new IntersectionObserver(([entry]) => {
+                      if (entry.isIntersecting && canLoadMore) {
+                          loadMore()
+                      }
+                  }, { threshold: 1.0 })
+                  observer.observe(el)
+                  return () => observer.disconnect()
+              }
+      }} />
+       
+      {isLoadingMore && (
+        <div className="text-center my-2 relative">
+          <hr className="absolute top-1/2 left-0 right-0  border-t border-gray-300 " />
+          <span className="relative inline-block bg-white border px-4 py-1 rounded-full text-xs border-gray-300 shadow-sm">
+            <Loader className="animate-spin size-4" />
+          </span>
+        </div>
+      )}
       {variant === "channel" && channelName && channelCreationTime && (
-        <ChannelHero name={channelName} creationTime={channelCreationTime}  />
+        <ChannelHero name={channelName} creationTime={channelCreationTime} />
       )}
     </div>
   );
