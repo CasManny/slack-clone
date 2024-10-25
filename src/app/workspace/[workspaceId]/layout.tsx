@@ -39,7 +39,9 @@ const WorkspaceIdLayout = ({ children }: WorkspaceIdLayoutProps) => {
             <WorkspaceSidebar />
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel minSize={20}>{children}</ResizablePanel>
+          <ResizablePanel minSize={20} defaultSize={80}>
+            {children}
+          </ResizablePanel>
           {showPanel && (
             <>
               <ResizableHandle withHandle />
@@ -52,7 +54,10 @@ const WorkspaceIdLayout = ({ children }: WorkspaceIdLayoutProps) => {
                     />
                   </div>
                 ) : profileMemberId ? (
-                  <Profile memberId={profileMemberId as Id<'members'>} onClose={onClose} />
+                  <Profile
+                    memberId={profileMemberId as Id<"members">}
+                    onClose={onClose}
+                  />
                 ) : (
                   <div className="flex h-full items-center justify-center">
                     <Loader className="size-5 animate-spin text-muted-foreground" />

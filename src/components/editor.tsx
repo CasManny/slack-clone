@@ -80,7 +80,6 @@ const Editor = ({
             enter: {
               key: "Enter",
               handler: () => {
-                // TODO: SUBMIT FORM
                 const text = quill.getText();
                 const addedImage = imageElementRef.current?.files![0] || null;
                 const isEmpty =

@@ -6,12 +6,14 @@ import { Loader } from "lucide-react";
 import Header from "./header";
 import ChatInput from "./chat-input";
 import MessageList from "@/components/message-list";
+import { usePanel } from "@/hooks/use-panel";
 
 interface ConversationProps {
   id: Id<"conversations">;
 }
 const Conversation = ({ id }: ConversationProps) => {
-  const memberId = useMemberId();
+    const memberId = useMemberId();
+    const { onOpenProfile} = usePanel()
   const { data: member, isLoading: memberLoading } = useGetMember({
     id: memberId,
   });
@@ -29,7 +31,7 @@ const Conversation = ({ id }: ConversationProps) => {
   return (
     <div className="flex h-full flex-col">
       <Header
-        onClick={() => {}}
+        onClick={() => onOpenProfile(memberId)}
         memberName={member?.user.name}
         memberImage={member?.user.image}
           />
